@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="../../node_modules/@nomiclabs/hardhat-ethers/src/internal/type-extensions.ts" />
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 

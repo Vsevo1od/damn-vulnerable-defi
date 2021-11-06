@@ -1,8 +1,8 @@
-require("@nomiclabs/hardhat-waffle");
-require('@openzeppelin/hardhat-upgrades');
-require('hardhat-dependency-compiler');
+import "@nomiclabs/hardhat-waffle";
+import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-dependency-compiler';
 
-module.exports = {
+export default {
     networks: {
       hardhat: {
         allowUnlimitedContractSize: true
