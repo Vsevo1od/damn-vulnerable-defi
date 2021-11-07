@@ -1,16 +1,17 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./FlashLoanReceiver.sol";
-import "./NaiveReceiverLenderPool.sol";
+import "../../naive-receiver/FlashLoanReceiver.sol";
+import "../../naive-receiver/NaiveReceiverLenderPool.sol";
 
 contract Attacker {
     FlashLoanReceiver private immutable flashLoanReceiver;
     NaiveReceiverLenderPool private immutable naiveReceiverLenderPool;
 
-    constructor(
+    constructor (
         FlashLoanReceiver _flashLoanReceiver,
         NaiveReceiverLenderPool _naiveReceiverLenderPool
-    ) public {
+    ) {
         flashLoanReceiver = _flashLoanReceiver;
         naiveReceiverLenderPool = _naiveReceiverLenderPool;
     }
